@@ -1,9 +1,12 @@
-﻿public class Approval
+﻿namespace ST10439055_POE_PROG6212.Models
 {
-    public int ApprovalId { get; set; }
-    public int ClaimId { get; set; }
-    public string ApprovedBy { get; set; }
-    public DateTime ApprovalDate { get; set; }
-    public string Remarks { get; set; }
-    public Claim Claim { get; set; }
+    public class Approval
+    {
+        public int ApprovalId { get; set; }
+        public int ClaimId { get; set; }
+        public string ApprovedBy { get; set; } = string.Empty;
+        public DateTime ApprovalDate { get; set; }
+        public string Remarks { get; set; } = string.Empty;
+        public Claim Claim { get; set; } = null!;
+    }
 }

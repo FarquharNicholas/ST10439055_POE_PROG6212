@@ -1,25 +1,103 @@
-﻿@{
+﻿@model ST10439055_POE_PROG6212.Models.ClaimSubmissionViewModel
+@{
     ViewBag.Title = "Submit Claim";
 }
-<div class="card p-4">
-    <h4>Submit Monthly Claim</h4>
-    <form>
-        <div class="mb-3">
-            <label class="form-label">Lecturer Name</label>
-            <input type="text" class="form-control" placeholder="Enter name" />
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-primary">Submit Monthly Claim</h3>
+                <p class="text-muted">Fill in your claim details below and submit with one click</p>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form asp-action="SubmitClaim" method="post" class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="LecturerName" class="form-label fw-semibold"></label>
+                        <input asp-for="LecturerName" class="form-control" placeholder="Enter your full name" />
+                        <span asp-validation-for="LecturerName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" class="form-control" placeholder="your.email@university.ac.za" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Department" class="form-label fw-semibold"></label>
+                        <input asp-for="Department" class="form-control" placeholder="e.g., Computer Science" />
+                        <span asp-validation-for="Department" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Month" class="form-label fw-semibold"></label>
+                        <input asp-for="Month" type="month" class="form-control" />
+                        <span asp-validation-for="Month" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="HoursWorked" class="form-label fw-semibold"></label>
+                        <input asp-for="HoursWorked" class="form-control" placeholder="Enter hours worked" min="1" max="200" />
+                        <span asp-validation-for="HoursWorked" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="HourlyRate" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">R</span>
+                            <input asp-for="HourlyRate" class="form-control" placeholder="0.00" step="0.01" />
+                        </div>
+                        <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Notes" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any additional notes or comments (optional)"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                        <i class="bi bi-send-fill me-2"></i>
+                        Submit Claim
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Month</label>
-            <input type="month" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Hours Worked</label>
-            <input type="number" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Hourly Rate</label>
-            <input type="number" class="form-control" />
-        </div>
-        <button type="submit" class="btn-apple">Submit</button>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Bootstrap form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}

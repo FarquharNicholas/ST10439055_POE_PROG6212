@@ -1,23 +1,102 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
 }
-<div class="row text-center">
-    <div class="col-md-4 mb-4">
-        <div class="card p-4">
-            <h5>Submit Claim</h5>
-            <a href="@Url.Action("SubmitClaim")" class="btn btn-apple mt-2">Go</a>
-        </div>
-    </div> 
-    <div class="col-md-4 mb-4">
-        <div class="card p-4">
-            <h5>View Claims</h5>
-            <a href="@Url.Action("ViewClaims")" class="btn btn-apple mt-2">Go</a>
+
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-primary">Welcome to CMCS</h2>
+            <p class="text-muted fs-5">Claim Management & Control System</p>
         </div>
     </div>
+</div>
+
+<div class="row">
+    <!-- Quick Submit Claim - Prominent Card -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 border-primary">
+            <div class="card-body text-center p-5">
+                <div class="mb-4">
+                    <i class="bi bi-plus-circle-fill text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="fw-bold text-primary mb-3">Submit New Claim</h4>
+                <p class="text-muted mb-4">Submit your monthly claim with just a few clicks. Quick, easy, and secure.</p>
+                <a href="@Url.Action("SubmitClaim")" class="btn btn-primary btn-lg fw-semibold px-4">
+                    <i class="bi bi-send-fill me-2"></i>Submit Claim Now
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Claims -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center p-5">
+                <div class="mb-4">
+                    <i class="bi bi-list-ul text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="fw-bold text-success mb-3">View My Claims</h4>
+                <p class="text-muted mb-4">Track the status of your submitted claims and view payment history.</p>
+                <a href="@Url.Action("ViewClaims")" class="btn btn-success btn-lg fw-semibold px-4">
+                    <i class="bi bi-eye-fill me-2"></i>View Claims
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Upload Documents -->
     <div class="col-md-4 mb-4">
-        <div class="card p-4">
-            <h5>Upload Docs</h5>
-            <a href="@Url.Action("UploadDocs")" class="btn btn-apple mt-2">Go</a>
+        <div class="card h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-cloud-upload text-info" style="font-size: 2.5rem;"></i>
+                </div>
+                <h5 class="fw-bold text-info mb-3">Upload Documents</h5>
+                <p class="text-muted mb-3">Upload supporting documents for your claims.</p>
+                <a href="@Url.Action("UploadDocs")" class="btn btn-info fw-semibold">
+                    <i class="bi bi-upload me-2"></i>Upload Docs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Review -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-shield-check text-warning" style="font-size: 2.5rem;"></i>
+                </div>
+                <h5 class="fw-bold text-warning mb-3">Admin Review</h5>
+                <p class="text-muted mb-3">Review and approve submitted claims.</p>
+                <a href="@Url.Action("AdminReview")" class="btn btn-warning fw-semibold">
+                    <i class="bi bi-clipboard-check me-2"></i>Admin Review
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 bg-light">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-graph-up text-secondary" style="font-size: 2.5rem;"></i>
+                </div>
+                <h5 class="fw-bold text-secondary mb-3">Quick Stats</h5>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h6 class="text-muted">This Month</h6>
+                        <h5 class="text-primary">0</h5>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-muted">Total Claims</h6>
+                        <h5 class="text-success">0</h5>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

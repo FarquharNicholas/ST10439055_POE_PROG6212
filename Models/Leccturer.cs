@@ -1,11 +1,12 @@
-﻿using System.Security.Claims;
-
-public class Lecturer
+﻿namespace ST10439055_POE_PROG6212.Models
 {
-    public int LecturerId { get; set; }
-    public string FullName { get; set; }
-    public string Email { get; set; }
-    public string Department { get; set; }
-    public decimal HourlyRate { get; set; }
-    public ICollection<Claim> Claims { get; set; }
+    public class Lecturer
+    {
+        public int LecturerId { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public decimal HourlyRate { get; set; }
+        public ICollection<Claim> Claims { get; set; } = new List<Claim>();
+    }
 }
