@@ -20,7 +20,7 @@
                 </div>
             }
 
-            <form asp-action="SubmitClaim" method="post" class="needs-validation" novalidate>
+            <form asp-action="SubmitClaim" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="LecturerName" class="form-label fw-semibold"></label>
@@ -69,6 +69,22 @@
                     <span asp-validation-for="Notes" class="text-danger"></span>
                 </div>
 
+                <div class="mb-4">
+                    <label asp-for="SupportingDocument" class="form-label fw-semibold"></label>
+                    <div class="file-upload-container">
+                        <input asp-for="SupportingDocument" type="file" class="form-control" accept=".pdf,.docx,.xlsx,.doc,.xls" id="fileInput" />
+                        <div class="file-info mt-2" id="fileInfo" style="display: none;">
+                            <div class="alert alert-info d-flex align-items-center">
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                <span id="fileName"></span>
+                                <button type="button" class="btn-close ms-auto" onclick="clearFile()"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Supported formats: PDF, DOCX, XLSX (Max 10MB)</small>
+                    <span asp-validation-for="SupportingDocument" class="text-danger"></span>
+                </div>
+
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary btn-lg fw-semibold">
                         <i class="bi bi-send-fill me-2"></i>
@@ -99,5 +115,41 @@
                 });
             }, false);
         })();
+
+        // File upload handling
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            
+            if (file) {
+                // Validate file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size exceeds 10MB limit. Please choose a smaller file.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validate file type
+                const allowedTypes = ['.pdf', '.docx', '.xlsx', '.doc', '.xls'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedTypes.includes(fileExtension)) {
+                    alert('Invalid file type. Please select a PDF, DOCX, or XLSX file.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                fileName.textContent = file.name;
+                fileInfo.style.display = 'block';
+            } else {
+                fileInfo.style.display = 'none';
+            }
+        });
+
+        function clearFile() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').style.display = 'none';
+        }
     </script>
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10439055_POE_PROG6212.Models;
 using ST10439055_POE_PROG6212.Data;
+using ST10439055_POE_PROG6212.Services;
 
 namespace ST10439055_POE_PROG6212.Controllers
 {
@@ -10,11 +11,13 @@ namespace ST10439055_POE_PROG6212.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IFileUploadService _fileUploadService;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, IFileUploadService fileUploadService)
         {
             _logger = logger;
             _context = context;
+            _fileUploadService = fileUploadService;
         }
 
         public IActionResult Index() => View();   // Home Page
@@ -64,6 +67,29 @@ namespace ST10439055_POE_PROG6212.Controllers
                     _context.Claims.Add(claim);
                     await _context.SaveChangesAsync();
 
+                    // Handle file upload if provided
+                    if (model.SupportingDocument != null && model.SupportingDocument.Length > 0)
+                    {
+                        var uploadResult = await _fileUploadService.UploadFileAsync(model.SupportingDocument, claim.ClaimId);
+                        if (uploadResult.Success)
+                        {
+                            var supportingDocument = new SupportingDocument
+                            {
+                                ClaimId = claim.ClaimId,
+                                FileName = uploadResult.FileName,
+                                FilePath = uploadResult.FilePath,
+                                UploadedAt = DateTime.Now
+                            };
+                            _context.SupportingDocuments.Add(supportingDocument);
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            TempData["WarningMessage"] = $"Claim submitted but file upload failed: {uploadResult.ErrorMessage}";
+                            return RedirectToAction(nameof(SubmitClaim));
+                        }
+                    }
+
                     TempData["SuccessMessage"] = "Claim submitted successfully!";
                     return RedirectToAction(nameof(SubmitClaim));
                 }
@@ -86,7 +112,15 @@ namespace ST10439055_POE_PROG6212.Controllers
             return View(claims);
         }
 
-        public IActionResult UploadDocs() => View();
+        public async Task<IActionResult> UploadDocs()
+        {
+            var documents = await _context.SupportingDocuments
+                .Include(sd => sd.Claim)
+                .ThenInclude(c => c.Lecturer)
+                .OrderByDescending(sd => sd.UploadedAt)
+                .ToListAsync();
+            return View(documents);
+        }
         
         [HttpGet]
         public async Task<IActionResult> AdminReview()

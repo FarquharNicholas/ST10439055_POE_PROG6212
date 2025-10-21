@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.Features;
 using ST10439055_POE_PROG6212.Data;
+using ST10439055_POE_PROG6212.Services;
 
 namespace ST10439055_POE_PROG6212
 {
@@ -13,6 +15,15 @@ namespace ST10439055_POE_PROG6212
             
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Configure file upload settings
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 10485760; // 10MB limit
+            });
+
+            // Register services
+            builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
             var app = builder.Build();
             

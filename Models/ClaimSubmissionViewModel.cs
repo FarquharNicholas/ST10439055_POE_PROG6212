@@ -35,5 +35,8 @@ namespace ST10439055_POE_PROG6212.Models
         [Display(Name = "Additional Notes")]
         [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
         public string? Notes { get; set; }
+
+        [Display(Name = "Supporting Document")]
+        public IFormFile? SupportingDocument { get; set; }
     }
 }
