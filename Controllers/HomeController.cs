@@ -87,7 +87,93 @@ namespace ST10439055_POE_PROG6212.Controllers
         }
 
         public IActionResult UploadDocs() => View();
-        public IActionResult AdminReview() => View();
+        
+        [HttpGet]
+        public async Task<IActionResult> AdminReview()
+        {
+            var claims = await _context.Claims
+                .Include(c => c.Lecturer)
+                .OrderByDescending(c => c.Month)
+                .ToListAsync();
+            return View(claims);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveClaim(int claimId, string remarks = "")
+        {
+            try
+            {
+                var claim = await _context.Claims.FindAsync(claimId);
+                if (claim == null)
+                {
+                    TempData["ErrorMessage"] = "Claim not found.";
+                    return RedirectToAction(nameof(AdminReview));
+                }
+
+                claim.Status = "Approved";
+                _context.Claims.Update(claim);
+
+                // Add approval record
+                var approval = new Approval
+                {
+                    ClaimId = claimId,
+                    ApprovedBy = "Admin", // In a real app, this would be the logged-in user
+                    ApprovalDate = DateTime.Now,
+                    Remarks = remarks
+                };
+                _context.Approvals.Add(approval);
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Claim #{claimId} has been approved successfully.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error approving claim {ClaimId}", claimId);
+                TempData["ErrorMessage"] = "An error occurred while approving the claim.";
+            }
+
+            return RedirectToAction(nameof(AdminReview));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectClaim(int claimId, string remarks = "")
+        {
+            try
+            {
+                var claim = await _context.Claims.FindAsync(claimId);
+                if (claim == null)
+                {
+                    TempData["ErrorMessage"] = "Claim not found.";
+                    return RedirectToAction(nameof(AdminReview));
+                }
+
+                claim.Status = "Rejected";
+                _context.Claims.Update(claim);
+
+                // Add approval record for rejection
+                var approval = new Approval
+                {
+                    ClaimId = claimId,
+                    ApprovedBy = "Admin", // In a real app, this would be the logged-in user
+                    ApprovalDate = DateTime.Now,
+                    Remarks = remarks
+                };
+                _context.Approvals.Add(approval);
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Claim #{claimId} has been rejected.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error rejecting claim {ClaimId}", claimId);
+                TempData["ErrorMessage"] = "An error occurred while rejecting the claim.";
+            }
+
+            return RedirectToAction(nameof(AdminReview));
+        }
+
         public IActionResult Privacy() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
