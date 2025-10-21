@@ -26,6 +26,7 @@
                                 <th>Hourly Rate</th>
                                 <th>Total Amount</th>
                                 <th>Status</th>
+                                <th style="width:220px">Progress</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -40,9 +41,18 @@
                                     <td>R @claim.Lecturer.HourlyRate.ToString("F2")</td>
                                     <td class="fw-bold text-success">R @claim.TotalAmount.ToString("F2")</td>
                                     <td>
-                                        <span class="badge @(claim.Status == "Approved" ? "bg-success" : claim.Status == "Rejected" ? "bg-danger" : "bg-warning")">
+                                        <span id="status-badge-@claim.ClaimId" class="badge @(claim.Status == "Approved" ? "bg-success" : claim.Status == "Rejected" ? "bg-danger" : "bg-warning")">
                                             @claim.Status
                                         </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            @{
+                                                var pct = claim.Status == "Approved" ? 100 : claim.Status == "Rejected" ? 100 : 50;
+                                                var barClass = claim.Status == "Approved" ? "bg-success" : claim.Status == "Rejected" ? "bg-danger" : "bg-warning";
+                                            }
+                                            <div id="status-progress-@claim.ClaimId" class="progress-bar @barClass" role="progressbar" style="width: @pct%" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary" onclick="viewClaimDetails(@claim.ClaimId)">
@@ -86,6 +96,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
         function viewClaimDetails(claimId) {
             // This would typically load claim details via AJAX
@@ -96,5 +107,37 @@
             var modal = new bootstrap.Modal(document.getElementById('claimDetailsModal'));
             modal.show();
         }
+
+        // Real-time updates via SignalR
+        (function() {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/claimStatus')
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on('ClaimStatusChanged', function (claimId, newStatus) {
+                const badge = document.getElementById('status-badge-' + claimId);
+                if (!badge) return;
+                badge.textContent = newStatus;
+                badge.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+                if (newStatus === 'Approved') badge.classList.add('bg-success');
+                else if (newStatus === 'Rejected') badge.classList.add('bg-danger');
+                else badge.classList.add('bg-warning');
+
+                const progress = document.getElementById('status-progress-' + claimId);
+                if (progress) {
+                    let pct = 50;
+                    let cls = 'bg-warning';
+                    if (newStatus === 'Approved') { pct = 100; cls = 'bg-success'; }
+                    else if (newStatus === 'Rejected') { pct = 100; cls = 'bg-danger'; }
+                    progress.style.width = pct + '%';
+                    progress.setAttribute('aria-valuenow', pct.toString());
+                    progress.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+                    progress.classList.add(cls);
+                }
+            });
+
+            connection.start().catch(err => console.error(err));
+        })();
     </script>
 }

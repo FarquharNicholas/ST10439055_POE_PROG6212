@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.Features;
 using ST10439055_POE_PROG6212.Data;
 using ST10439055_POE_PROG6212.Services;
+using ST10439055_POE_PROG6212.Hubs;
 
 namespace ST10439055_POE_PROG6212
 {
@@ -12,6 +13,7 @@ namespace ST10439055_POE_PROG6212
             var builder = WebApplication.CreateBuilder(args);
            
             builder.Services.AddControllersWithViews();
+            builder.Services.AddSignalR();
             
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -43,6 +45,8 @@ namespace ST10439055_POE_PROG6212
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
+
+            app.MapHub<ClaimStatusHub>("/hubs/claimStatus");
 
             app.Run();
         }

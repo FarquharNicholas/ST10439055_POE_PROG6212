@@ -159,6 +159,9 @@ namespace ST10439055_POE_PROG6212.Controllers
                 _context.Approvals.Add(approval);
 
                 await _context.SaveChangesAsync();
+                // Broadcast update
+                await HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<ST10439055_POE_PROG6212.Hubs.ClaimStatusHub>>()
+                    .Clients.All.SendAsync("ClaimStatusChanged", claim.ClaimId, claim.Status);
                 TempData["SuccessMessage"] = $"Claim #{claimId} has been approved successfully.";
             }
             catch (Exception ex)
@@ -197,6 +200,9 @@ namespace ST10439055_POE_PROG6212.Controllers
                 _context.Approvals.Add(approval);
 
                 await _context.SaveChangesAsync();
+                // Broadcast update
+                await HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<ST10439055_POE_PROG6212.Hubs.ClaimStatusHub>>()
+                    .Clients.All.SendAsync("ClaimStatusChanged", claim.ClaimId, claim.Status);
                 TempData["SuccessMessage"] = $"Claim #{claimId} has been rejected.";
             }
             catch (Exception ex)
