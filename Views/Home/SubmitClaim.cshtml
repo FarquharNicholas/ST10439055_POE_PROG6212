@@ -99,7 +99,6 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Bootstrap form validation
         (function() {
             'use strict';
             window.addEventListener('load', function() {
@@ -116,21 +115,18 @@
             }, false);
         })();
 
-        // File upload handling
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const fileInfo = document.getElementById('fileInfo');
             const fileName = document.getElementById('fileName');
             
             if (file) {
-                // Validate file size (10MB limit)
                 if (file.size > 10 * 1024 * 1024) {
                     alert('File size exceeds 10MB limit. Please choose a smaller file.');
                     e.target.value = '';
                     return;
                 }
                 
-                // Validate file type
                 const allowedTypes = ['.pdf', '.docx', '.xlsx', '.doc', '.xls'];
                 const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
                 

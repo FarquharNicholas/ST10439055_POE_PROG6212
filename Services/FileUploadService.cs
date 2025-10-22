@@ -29,7 +29,6 @@ namespace ST10439055_POE_PROG6212.Services
         {
             try
             {
-                // Validate file
                 if (file == null || file.Length == 0)
                 {
                     return (false, string.Empty, string.Empty, "No file selected.");
@@ -45,19 +44,16 @@ namespace ST10439055_POE_PROG6212.Services
                     return (false, string.Empty, string.Empty, "File size exceeds the 10MB limit.");
                 }
 
-                // Create uploads directory if it doesn't exist
                 var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads", "claims", claimId.ToString());
                 if (!Directory.Exists(uploadsPath))
                 {
                     Directory.CreateDirectory(uploadsPath);
                 }
 
-                // Generate unique filename
                 var fileExtension = GetFileExtension(file.FileName);
                 var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
                 var filePath = Path.Combine(uploadsPath, uniqueFileName);
 
-                // Save file
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);

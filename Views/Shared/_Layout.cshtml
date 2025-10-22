@@ -48,7 +48,6 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Home")">CMCS</a>
@@ -64,12 +63,10 @@
         </div>
     </nav>
 
-    <!-- Page Content -->
     <div class="container mt-4">
         @RenderBody()
     </div>
 
-    <!-- Bootstrap Script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     @await RenderSectionAsync("Scripts", required: false)

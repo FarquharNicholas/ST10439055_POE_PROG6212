@@ -18,13 +18,11 @@ namespace ST10439055_POE_PROG6212
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Configure file upload settings
             builder.Services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = 10485760; // 10MB limit
+                options.MultipartBodyLengthLimit = 10485760; 
             });
 
-            // Register services
             builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
             var app = builder.Build();

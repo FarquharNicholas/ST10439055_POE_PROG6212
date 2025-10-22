@@ -80,7 +80,6 @@
     </div>
 </div>
 
-<!-- Claim Details Modal -->
 <div class="modal fade" id="claimDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -89,7 +88,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="claimDetailsContent">
-                <!-- Content will be loaded here -->
             </div>
         </div>
     </div>
@@ -99,8 +97,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
         function viewClaimDetails(claimId) {
-            // This would typically load claim details via AJAX
-            // For now, we'll show a simple message
             document.getElementById('claimDetailsContent').innerHTML = 
                 '<p>Claim #' + claimId + ' details would be loaded here.</p>';
             
@@ -108,7 +104,6 @@
             modal.show();
         }
 
-        // Real-time updates via SignalR
         (function() {
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl('/hubs/claimStatus')
