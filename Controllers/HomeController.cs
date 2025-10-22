@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ST10439055_POE_PROG6212.Models;
 using ST10439055_POE_PROG6212.Data;
 using ST10439055_POE_PROG6212.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ST10439055_POE_PROG6212.Controllers
 {
@@ -20,7 +21,7 @@ namespace ST10439055_POE_PROG6212.Controllers
             _fileUploadService = fileUploadService;
         }
 
-        public IActionResult Index() => View();   // Home Page
+        public IActionResult Index() => View();   
         public IActionResult Dashboard() => View();
         
         [HttpGet]
@@ -37,7 +38,7 @@ namespace ST10439055_POE_PROG6212.Controllers
             {
                 try
                 {
-                    // Find or create lecturer
+                
                     var lecturer = await _context.Lecturers
                         .FirstOrDefaultAsync(l => l.Email == model.Email);
 
@@ -54,7 +55,7 @@ namespace ST10439055_POE_PROG6212.Controllers
                         await _context.SaveChangesAsync();
                     }
 
-                    // Create claim
+         
                     var claim = new Claim
                     {
                         LecturerId = lecturer.LecturerId,
@@ -67,7 +68,7 @@ namespace ST10439055_POE_PROG6212.Controllers
                     _context.Claims.Add(claim);
                     await _context.SaveChangesAsync();
 
-                    // Handle file upload if provided
+                    
                     if (model.SupportingDocument != null && model.SupportingDocument.Length > 0)
                     {
                         var uploadResult = await _fileUploadService.UploadFileAsync(model.SupportingDocument, claim.ClaimId);
@@ -148,18 +149,18 @@ namespace ST10439055_POE_PROG6212.Controllers
                 claim.Status = "Approved";
                 _context.Claims.Update(claim);
 
-                // Add approval record
+              
                 var approval = new Approval
                 {
                     ClaimId = claimId,
-                    ApprovedBy = "Admin", // In a real app, this would be the logged-in user
+                    ApprovedBy = "Admin", 
                     ApprovalDate = DateTime.Now,
                     Remarks = remarks
                 };
                 _context.Approvals.Add(approval);
 
                 await _context.SaveChangesAsync();
-                // Broadcast update
+                
                 await HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<ST10439055_POE_PROG6212.Hubs.ClaimStatusHub>>()
                     .Clients.All.SendAsync("ClaimStatusChanged", claim.ClaimId, claim.Status);
                 TempData["SuccessMessage"] = $"Claim #{claimId} has been approved successfully.";
@@ -189,18 +190,18 @@ namespace ST10439055_POE_PROG6212.Controllers
                 claim.Status = "Rejected";
                 _context.Claims.Update(claim);
 
-                // Add approval record for rejection
+              
                 var approval = new Approval
                 {
                     ClaimId = claimId,
-                    ApprovedBy = "Admin", // In a real app, this would be the logged-in user
+                    ApprovedBy = "Admin", 
                     ApprovalDate = DateTime.Now,
                     Remarks = remarks
                 };
                 _context.Approvals.Add(approval);
 
                 await _context.SaveChangesAsync();
-                // Broadcast update
+              
                 await HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<ST10439055_POE_PROG6212.Hubs.ClaimStatusHub>>()
                     .Clients.All.SendAsync("ClaimStatusChanged", claim.ClaimId, claim.Status);
                 TempData["SuccessMessage"] = $"Claim #{claimId} has been rejected.";
