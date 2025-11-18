@@ -50,7 +50,7 @@ namespace ST10439055_POE_PROG6212
 
                 var passwordService = scope.ServiceProvider.GetRequiredService<IPasswordService>();
                 
-                // Ensure HR super user exists AND has the correct HR role & password
+                
                 var hrUser = context.Lecturers.FirstOrDefault(l => l.Email == "hr@cmcs.local");
                 passwordService.CreatePasswordHash("Hr@12345", out var hrHash, out var hrSalt);
 
