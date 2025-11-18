@@ -8,7 +8,7 @@
 <div class="row mb-4">
     <div class="col-12">
         <h2 class="fw-bold text-primary">HR Operations Center</h2>
-        <p class="text-muted mb-0">Automate payroll preparation and manage lecturer data with confidence.</p>
+        <p class="text-muted mb-0"></p>
     </div>
 </div>
 
@@ -18,7 +18,7 @@
             <div class="card-body">
                 <small class="text-muted text-uppercase">Total Approved Payout</small>
                 <h3 class="fw-bold mt-2">R @Model.TotalApprovedAmount.ToString("N2")</h3>
-                <p class="text-muted mb-0">Across all approved claims in the current view.</p>
+                <p class="text-muted mb-0"></p>
             </div>
         </div>
     </div>
@@ -27,16 +27,16 @@
             <div class="card-body">
                 <small class="text-muted text-uppercase">Approved Hours</small>
                 <h3 class="fw-bold mt-2">@Model.TotalApprovedHours</h3>
-                <p class="text-muted mb-0">Sum of hours in approved claims.</p>
+                <p class="text-muted mb-0"></p>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-body">
-                <small class="text-muted text-uppercase">Lecturers On Record</small>
+                <small class="text-muted text-uppercase">Lecturers</small>
                 <h3 class="fw-bold mt-2">@Model.LecturerCount</h3>
-                <p class="text-muted mb-0">Manage lecturer data and rates centrally.</p>
+                <p class="text-muted mb-0"></p>
             </div>
         </div>
     </div>
@@ -45,7 +45,7 @@
 <div class="card mb-4">
     <div class="card-header">
         <h5 class="mb-0">Create New User Profile</h5>
-        <small class="text-muted">HR provisions every account and shares login details with staff.</small>
+        <small class="text-muted"></small>
     </div>
     <div class="card-body">
         <form asp-action="CreateUser" method="post" class="row gy-3">
@@ -93,7 +93,7 @@
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
         <div>
             <h5 class="mb-0">Approved Claim Report</h5>
-            <small class="text-muted">Filter by payroll month and export to CSV for finance.</small>
+            <small class="text-muted"></small>
         </div>
         <div class="d-flex gap-2 flex-wrap">
             <form asp-action="HRDashboard" method="get" class="d-flex align-items-center gap-2">
@@ -160,7 +160,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <div>
             <h5 class="mb-0">Lecturer Directory</h5>
-            <small class="text-muted">Update lecturer contact information and rates.</small>
+            <small class="text-muted"></small>
         </div>
     </div>
     <div class="card-body p-0">
