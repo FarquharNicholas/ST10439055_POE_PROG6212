@@ -1,14 +1,15 @@
 ﻿@model IEnumerable<ST10439055_POE_PROG6212.Models.ClaimReviewViewModel>
 @using ST10439055_POE_PROG6212.Models
 @{
-    ViewBag.Title = "Admin Review";
+    var heading = ViewBag.ReviewHeading as string ?? "Admin Review Dashboard";
+    ViewBag.Title = heading;
 }
 
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-primary mb-1">Admin Review Dashboard</h2>
+                <h2 class="fw-bold text-primary mb-1">@heading</h2>
                 <p class="text-muted">Review and approve lecturer claims</p>
             </div>
             <div class="d-flex gap-2">

@@ -1,0 +1,88 @@
+@model ST10439055_POE_PROG6212.Models.LoginViewModel
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Sign In";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm p-4 mt-4">
+            <h3 class="fw-bold text-primary mb-3 text-center">Sign in to CMCS</h3>
+            <p class="text-muted text-center mb-4">Use the credentials provided by HR to continue.</p>
+
+            <form asp-action="Login" method="post" class="needs-validation" novalidate>
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label fw-semibold"></label>
+                    <input asp-for="Email" class="form-control" placeholder="your.name@university.ac.za" required />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-semibold"></label>
+                    <input asp-for="Password" class="form-control" placeholder="Enter your password" required />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+            </form>
+
+            <div class="mt-4 text-center text-muted">
+                Need access? Contact the HR super user to create your profile.
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0 fw-semibold">Demo Accounts (for marking)</h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    These accounts are seeded automatically so moderators can log in quickly.
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Role</th>
+                                <th>Email</th>
+                                <th>Password</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-semibold">HR Super User</td>
+                                <td><code>hr@cmcs.local</code></td>
+                                <td><code>Hr@12345</code></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold">Programme Coordinator</td>
+                                <td><code>coordinator@cmcs.local</code></td>
+                                <td><code>Coord@123</code></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold">Academic Manager</td>
+                                <td><code>manager@cmcs.local</code></td>
+                                <td><code>Manager@123</code></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold">Lecturer Demo</td>
+                                <td><code>lecturer.demo@cmcs.local</code></td>
+                                <td><code>Lecturer@123</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <small class="text-muted">
+                    Tip: log in as HR to change these passwords or create more accounts.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

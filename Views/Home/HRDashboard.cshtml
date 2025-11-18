@@ -1,0 +1,322 @@
+@model ST10439055_POE_PROG6212.Models.HRDashboardViewModel
+@using ST10439055_POE_PROG6212.Models
+@{
+    ViewBag.Title = "HR Dashboard";
+    var selectedMonth = ViewBag.SelectedMonth as string ?? string.Empty;
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold text-primary">HR Operations Center</h2>
+        <p class="text-muted mb-0">Automate payroll preparation and manage lecturer data with confidence.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <small class="text-muted text-uppercase">Total Approved Payout</small>
+                <h3 class="fw-bold mt-2">R @Model.TotalApprovedAmount.ToString("N2")</h3>
+                <p class="text-muted mb-0">Across all approved claims in the current view.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <small class="text-muted text-uppercase">Approved Hours</small>
+                <h3 class="fw-bold mt-2">@Model.TotalApprovedHours</h3>
+                <p class="text-muted mb-0">Sum of hours in approved claims.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <small class="text-muted text-uppercase">Lecturers On Record</small>
+                <h3 class="fw-bold mt-2">@Model.LecturerCount</h3>
+                <p class="text-muted mb-0">Manage lecturer data and rates centrally.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Create New User Profile</h5>
+        <small class="text-muted">HR provisions every account and shares login details with staff.</small>
+    </div>
+    <div class="card-body">
+        <form asp-action="CreateUser" method="post" class="row gy-3">
+            @Html.AntiForgeryToken()
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Full Name</label>
+                <input type="text" name="FullName" class="form-control" placeholder="e.g. Thabo Nkosi" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Email</label>
+                <input type="email" name="Email" class="form-control" placeholder="name@university.ac.za" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Department</label>
+                <input type="text" name="Department" class="form-control" placeholder="Human Resources" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Role</label>
+                <select name="Role" class="form-select" required>
+                    @foreach (var role in Enum.GetValues(typeof(UserRole)).Cast<UserRole>())
+                    {
+                        <option value="@role">@role</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Hourly Rate (Lecturers)</label>
+                <input type="number" name="HourlyRate" class="form-control" min="0" step="0.01" placeholder="0.00" />
+                <small class="text-muted">Ignored for non-lecturer roles.</small>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Temporary Password</label>
+                <input type="password" name="Password" class="form-control" placeholder="At least 6 characters" minlength="6" required />
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-person-plus me-1"></i>Create User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-5">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">Approved Claim Report</h5>
+            <small class="text-muted">Filter by payroll month and export to CSV for finance.</small>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <form asp-action="HRDashboard" method="get" class="d-flex align-items-center gap-2">
+                <input type="month" class="form-control" name="filterMonth" value="@selectedMonth" />
+                <button type="submit" class="btn btn-outline-primary">Apply Filter</button>
+                <a asp-action="HRDashboard" class="btn btn-outline-secondary">Clear</a>
+            </form>
+            <a class="btn btn-success"
+               asp-action="DownloadApprovedClaimsReport"
+               asp-route-month="@(string.IsNullOrEmpty(selectedMonth) ? null : selectedMonth)">
+                <i class="bi bi-download me-1"></i>Download CSV
+            </a>
+            <a class="btn btn-outline-success"
+               asp-action="DownloadApprovedClaimsPdf"
+               asp-route-month="@(string.IsNullOrEmpty(selectedMonth) ? null : selectedMonth)">
+                <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.ApprovedClaims.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Claim #</th>
+                            <th>Lecturer</th>
+                            <th>Department</th>
+                            <th>Month</th>
+                            <th class="text-center">Hours</th>
+                            <th class="text-end">Hourly Rate</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.ApprovedClaims)
+                        {
+                            <tr>
+                                <td>@row.ClaimId</td>
+                                <td>@row.LecturerName</td>
+                                <td>@row.Department</td>
+                                <td>@row.MonthDisplay</td>
+                                <td class="text-center">@row.HoursWorked</td>
+                                <td class="text-end">R @row.HourlyRate.ToString("F2")</td>
+                                <td class="text-end fw-semibold text-success">R @row.TotalAmount.ToString("F2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-clipboard-x display-4 text-muted"></i>
+                <p class="text-muted mt-3 mb-0">No approved claims found for the selected period.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">Lecturer Directory</h5>
+            <small class="text-muted">Update lecturer contact information and rates.</small>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Lecturers.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="text-end">Hourly Rate</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var lecturer in Model.Lecturers)
+                        {
+                            <tr>
+                                <td>@lecturer.FullName</td>
+                                <td>@lecturer.Email</td>
+                                <td>@lecturer.Department</td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-dark">@lecturer.Role</span>
+                                </td>
+                                <td>
+                                    <span class="badge @(lecturer.IsActive ? "bg-success" : "bg-secondary")">
+                                        @(lecturer.IsActive ? "Active" : "Disabled")
+                                    </span>
+                                </td>
+                                <td class="text-end">R @lecturer.HourlyRate.ToString("F2")</td>
+                                <td class="text-end">
+                                    <button class="btn btn-outline-primary btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#lecturerModal"
+                                            data-id="@lecturer.LecturerId"
+                                            data-name="@lecturer.FullName"
+                                            data-email="@lecturer.Email"
+                                            data-department="@lecturer.Department"
+                                            data-role="@lecturer.Role"
+                                            data-active="@lecturer.IsActive.ToString().ToLower()"
+                                            data-rate="@lecturer.HourlyRate.ToString("F2")">
+                                        <i class="bi bi-pencil-square me-1"></i>Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-people display-4 text-muted"></i>
+                <p class="text-muted mt-3 mb-0">No lecturers have been captured yet.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="lecturerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Lecturer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateLecturer" method="post" class="needs-validation" novalidate>
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="LecturerId" id="lecturerId" />
+                    <div class="mb-3">
+                        <label for="lecturerName" class="form-label fw-semibold">Full Name</label>
+                        <input type="text" class="form-control" id="lecturerName" name="FullName" required />
+                        <div class="invalid-feedback">Please provide a name.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lecturerEmail" class="form-label fw-semibold">Email</label>
+                        <input type="email" class="form-control" id="lecturerEmail" name="Email" required />
+                        <div class="invalid-feedback">Provide a valid email.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lecturerDept" class="form-label fw-semibold">Department</label>
+                        <input type="text" class="form-control" id="lecturerDept" name="Department" required />
+                        <div class="invalid-feedback">Department is required.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lecturerRole" class="form-label fw-semibold">Role</label>
+                        <select class="form-select" id="lecturerRole" name="Role" required>
+                            @foreach (var role in Enum.GetValues(typeof(UserRole)).Cast<UserRole>())
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lecturerRate" class="form-label fw-semibold">Hourly Rate (R)</label>
+                        <input type="number" class="form-control" id="lecturerRate" name="HourlyRate" step="0.01" min="0" required />
+                        <div class="invalid-feedback">Enter a valid hourly rate.</div>
+                        <small class="text-muted">Rate only applies to lecturers.</small>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="lecturerActive" name="IsActive" value="true">
+                        <label class="form-check-label" for="lecturerActive">Account is active</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lecturerNewPassword" class="form-label fw-semibold">Reset Password</label>
+                        <input type="password" class="form-control" id="lecturerNewPassword" name="NewPassword" placeholder="Leave blank to keep existing" minlength="6" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const lecturerModal = document.getElementById('lecturerModal');
+        const roleSelect = document.getElementById('lecturerRole');
+        const rateInput = document.getElementById('lecturerRate');
+        const activeInput = document.getElementById('lecturerActive');
+
+        const toggleRateField = () => {
+            if (roleSelect.value !== 'Lecturer') {
+                rateInput.value = 0;
+                rateInput.setAttribute('readonly', 'readonly');
+            } else {
+                rateInput.removeAttribute('readonly');
+            }
+        };
+
+        lecturerModal?.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+            document.getElementById('lecturerId').value = button.getAttribute('data-id');
+            document.getElementById('lecturerName').value = button.getAttribute('data-name');
+            document.getElementById('lecturerEmail').value = button.getAttribute('data-email');
+            document.getElementById('lecturerDept').value = button.getAttribute('data-department');
+            document.getElementById('lecturerRate').value = button.getAttribute('data-rate');
+            document.getElementById('lecturerNewPassword').value = '';
+            roleSelect.value = button.getAttribute('data-role');
+            activeInput.checked = button.getAttribute('data-active') === 'true';
+            toggleRateField();
+        });
+
+        roleSelect?.addEventListener('change', toggleRateField);
+    </script>
+}
+
+

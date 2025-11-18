@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ST10439055_POE_PROG6212.Models
 {
-    public class Lecturer
+    public class UserAccountCreateViewModel
     {
-        public int LecturerId { get; set; }
-
         [Required, StringLength(150)]
+        [Display(Name = "Full Name")]
         public string FullName { get; set; } = string.Empty;
 
         [Required, EmailAddress]
@@ -18,19 +15,16 @@ namespace ST10439055_POE_PROG6212.Models
         public string Department { get; set; } = string.Empty;
 
         [Range(0, 2000)]
+        [Display(Name = "Hourly Rate")]
         public decimal HourlyRate { get; set; }
 
+        [Required]
         public UserRole Role { get; set; } = UserRole.Lecturer;
 
-        public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
-        public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
-
-        public bool IsActive { get; set; } = true;
-
-        public string? PhoneNumber { get; set; }
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public ICollection<Claim> Claims { get; set; } = new List<Claim>();
+        [Required, DataType(DataType.Password)]
+        [StringLength(100, MinimumLength = 6)]
+        [Display(Name = "Temporary Password")]
+        public string Password { get; set; } = string.Empty;
     }
 }
+

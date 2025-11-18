@@ -21,45 +21,42 @@
             }
 
             <form asp-action="SubmitClaim" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                @Html.AntiForgeryToken()
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="LecturerName" class="form-label fw-semibold"></label>
-                        <input asp-for="LecturerName" class="form-control" placeholder="Enter your full name" />
-                        <span asp-validation-for="LecturerName" class="text-danger"></span>
+                        <input asp-for="LecturerName" class="form-control" readonly />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="Email" class="form-label fw-semibold"></label>
-                        <input asp-for="Email" class="form-control" placeholder="your.email@university.ac.za" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
+                        <input asp-for="Email" class="form-control" readonly />
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="Department" class="form-label fw-semibold"></label>
-                        <input asp-for="Department" class="form-control" placeholder="e.g., Computer Science" />
-                        <span asp-validation-for="Department" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Month" class="form-label fw-semibold"></label>
-                        <input asp-for="Month" type="month" class="form-control" />
-                        <span asp-validation-for="Month" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="HoursWorked" class="form-label fw-semibold"></label>
-                        <input asp-for="HoursWorked" class="form-control" type="number" placeholder="Enter hours worked" min="1" max="200" step="1" />
-                        <span asp-validation-for="HoursWorked" class="text-danger"></span>
+                        <input asp-for="Department" class="form-control" readonly />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="HourlyRate" class="form-label fw-semibold"></label>
                         <div class="input-group">
                             <span class="input-group-text">R</span>
-                            <input asp-for="HourlyRate" class="form-control" type="number" placeholder="0.00" min="0.01" max="1000" step="0.01" />
+                            <input asp-for="HourlyRate" class="form-control" readonly id="LecturerHourlyRate" />
                         </div>
-                        <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Month" class="form-label fw-semibold"></label>
+                        <input asp-for="Month" type="month" class="form-control" />
+                        <span asp-validation-for="Month" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="HoursWorked" class="form-label fw-semibold"></label>
+                        <input asp-for="HoursWorked" class="form-control" type="number" placeholder="Enter hours worked" min="1" max="180" step="1" />
+                        <span asp-validation-for="HoursWorked" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -135,13 +132,12 @@
         })();
 
         const hoursInput = document.getElementById('HoursWorked');
-        const rateInput = document.getElementById('HourlyRate');
+        const rateValue = parseFloat(document.getElementById('LecturerHourlyRate').value);
         const totalDisplay = document.getElementById('calculatedTotal');
         const payoutStatus = document.getElementById('payoutStatus');
         const calcMessage = document.getElementById('calculationMessage');
         const numericOptions = {
-            hours: { min: 1, max: 200 },
-            rate: { min: 0.01, max: 1000 }
+            hours: { min: 1, max: 180 }
         };
 
         const formatCurrency = value => `R${value.toFixed(2)}`;
@@ -153,7 +149,7 @@
 
         function updateCalculation() {
             const hours = parseFloat(hoursInput.value);
-            const rate = parseFloat(rateInput.value);
+            const rate = rateValue;
 
             if (isNaN(hours) || isNaN(rate)) {
                 totalDisplay.textContent = 'R0.00';
@@ -169,32 +165,22 @@
                 return;
             }
 
-            if (rate < numericOptions.rate.min || rate > numericOptions.rate.max) {
-                showStatus('Hourly rate outside allowed range', 'warning');
-                calcMessage.textContent = `Hourly rate must be between R${numericOptions.rate.min.toFixed(2)} and R${numericOptions.rate.max.toFixed(2)}.`;
-                totalDisplay.textContent = 'R0.00';
-                return;
-            }
-
             const total = hours * rate;
             totalDisplay.textContent = formatCurrency(total);
             showStatus('All good', 'success');
             calcMessage.textContent = 'Review the estimated payout before submitting your claim.';
         }
 
-        [hoursInput, rateInput].forEach(input => {
-            input?.addEventListener('input', updateCalculation);
-            input?.addEventListener('blur', function() {
-                if (!input.value) return;
-                const value = parseFloat(input.value);
-                const opts = input.id === 'HoursWorked' ? numericOptions.hours : numericOptions.rate;
-                if (value < opts.min) {
-                    input.value = opts.min;
-                } else if (value > opts.max) {
-                    input.value = opts.max;
-                }
-                updateCalculation();
-            });
+        hoursInput?.addEventListener('input', updateCalculation);
+        hoursInput?.addEventListener('blur', function() {
+            if (!hoursInput.value) return;
+            const value = parseFloat(hoursInput.value);
+            if (value < numericOptions.hours.min) {
+                hoursInput.value = numericOptions.hours.min;
+            } else if (value > numericOptions.hours.max) {
+                hoursInput.value = numericOptions.hours.max;
+            }
+            updateCalculation();
         });
 
         updateCalculation();

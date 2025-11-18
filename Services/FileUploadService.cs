@@ -17,7 +17,7 @@ namespace ST10439055_POE_PROG6212.Services
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<FileUploadService> _logger;
         private readonly string[] _allowedExtensions = { ".pdf", ".docx", ".xlsx", ".doc", ".xls" };
-        private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
+        private const long MaxFileSize = 10 * 1024 * 1024;
 
         public FileUploadService(IWebHostEnvironment environment, ILogger<FileUploadService> logger)
         {
