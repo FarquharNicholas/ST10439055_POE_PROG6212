@@ -9,6 +9,7 @@ namespace ST10439055_POE_PROG6212.Services
         private const int KeySize = 32;
         private const int Iterations = 100_000;
 
+
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             passwordSalt = RandomNumberGenerator.GetBytes(SaltSize);
@@ -21,6 +22,7 @@ namespace ST10439055_POE_PROG6212.Services
             if (storedHash.Length == 0 || storedSalt.Length == 0)
             {
                 return false;
+            
             }
 
             using var pbkdf2 = new Rfc2898DeriveBytes(password, storedSalt, Iterations, HashAlgorithmName.SHA256);
@@ -29,4 +31,5 @@ namespace ST10439055_POE_PROG6212.Services
         }
     }
 }
+
 
