@@ -50,16 +50,35 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="HoursWorked" class="form-label fw-semibold"></label>
-                        <input asp-for="HoursWorked" class="form-control" placeholder="Enter hours worked" min="1" max="200" />
+                        <input asp-for="HoursWorked" class="form-control" type="number" placeholder="Enter hours worked" min="1" max="200" step="1" />
                         <span asp-validation-for="HoursWorked" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="HourlyRate" class="form-label fw-semibold"></label>
                         <div class="input-group">
                             <span class="input-group-text">R</span>
-                            <input asp-for="HourlyRate" class="form-control" placeholder="0.00" step="0.01" />
+                            <input asp-for="HourlyRate" class="form-control" type="number" placeholder="0.00" min="0.01" max="1000" step="0.01" />
                         </div>
                         <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="card bg-light border-0 shadow-sm">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Estimated Payout</p>
+                                <h3 class="fw-bold text-primary mb-0" id="calculatedTotal">R0.00</h3>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-secondary" id="payoutStatus">Enter values to calculate</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pt-0">
+                            <small class="text-muted d-block" id="calculationMessage">
+                                Provide hours worked and hourly rate to preview your payment before submitting.
+                            </small>
+                        </div>
                     </div>
                 </div>
 
@@ -114,6 +133,71 @@
                 });
             }, false);
         })();
+
+        const hoursInput = document.getElementById('HoursWorked');
+        const rateInput = document.getElementById('HourlyRate');
+        const totalDisplay = document.getElementById('calculatedTotal');
+        const payoutStatus = document.getElementById('payoutStatus');
+        const calcMessage = document.getElementById('calculationMessage');
+        const numericOptions = {
+            hours: { min: 1, max: 200 },
+            rate: { min: 0.01, max: 1000 }
+        };
+
+        const formatCurrency = value => `R${value.toFixed(2)}`;
+
+        function showStatus(message, variant) {
+            payoutStatus.textContent = message;
+            payoutStatus.className = `badge bg-${variant}`;
+        }
+
+        function updateCalculation() {
+            const hours = parseFloat(hoursInput.value);
+            const rate = parseFloat(rateInput.value);
+
+            if (isNaN(hours) || isNaN(rate)) {
+                totalDisplay.textContent = 'R0.00';
+                showStatus('Enter values to calculate', 'secondary');
+                calcMessage.textContent = 'Both fields must contain valid numbers.';
+                return;
+            }
+
+            if (hours < numericOptions.hours.min || hours > numericOptions.hours.max) {
+                showStatus('Hours outside allowed range', 'warning');
+                calcMessage.textContent = `Hours must be between ${numericOptions.hours.min} and ${numericOptions.hours.max}.`;
+                totalDisplay.textContent = 'R0.00';
+                return;
+            }
+
+            if (rate < numericOptions.rate.min || rate > numericOptions.rate.max) {
+                showStatus('Hourly rate outside allowed range', 'warning');
+                calcMessage.textContent = `Hourly rate must be between R${numericOptions.rate.min.toFixed(2)} and R${numericOptions.rate.max.toFixed(2)}.`;
+                totalDisplay.textContent = 'R0.00';
+                return;
+            }
+
+            const total = hours * rate;
+            totalDisplay.textContent = formatCurrency(total);
+            showStatus('All good', 'success');
+            calcMessage.textContent = 'Review the estimated payout before submitting your claim.';
+        }
+
+        [hoursInput, rateInput].forEach(input => {
+            input?.addEventListener('input', updateCalculation);
+            input?.addEventListener('blur', function() {
+                if (!input.value) return;
+                const value = parseFloat(input.value);
+                const opts = input.id === 'HoursWorked' ? numericOptions.hours : numericOptions.rate;
+                if (value < opts.min) {
+                    input.value = opts.min;
+                } else if (value > opts.max) {
+                    input.value = opts.max;
+                }
+                updateCalculation();
+            });
+        });
+
+        updateCalculation();
 
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
