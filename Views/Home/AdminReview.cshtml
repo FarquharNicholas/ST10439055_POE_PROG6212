@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ST10439055_POE_PROG6212.Models.Claim>
+﻿@model IEnumerable<ST10439055_POE_PROG6212.Models.ClaimReviewViewModel>
+@using ST10439055_POE_PROG6212.Models
 @{
     ViewBag.Title = "Admin Review";
 }
@@ -11,9 +12,9 @@
                 <p class="text-muted">Review and approve lecturer claims</p>
             </div>
             <div class="d-flex gap-2">
-                <span class="badge bg-warning fs-6">@Model.Count(c => c.Status == "Pending") Pending</span>
-                <span class="badge bg-success fs-6">@Model.Count(c => c.Status == "Approved") Approved</span>
-                <span class="badge bg-danger fs-6">@Model.Count(c => c.Status == "Rejected") Rejected</span>
+                <span class="badge bg-warning fs-6">@Model.Count(c => c.Claim.Status == "Pending") Pending</span>
+                <span class="badge bg-success fs-6">@Model.Count(c => c.Claim.Status == "Approved") Approved</span>
+                <span class="badge bg-danger fs-6">@Model.Count(c => c.Claim.Status == "Rejected") Rejected</span>
             </div>
         </div>
 
@@ -38,8 +39,11 @@
         @if (Model != null && Model.Any())
         {
             <div class="row">
-                @foreach (var claim in Model)
+                @foreach (var review in Model)
                 {
+                    var claim = review.Claim;
+                    var hasBlocking = review.HasBlockingIssues;
+                    var hasWarnings = review.RequiresAttention && !review.HasBlockingIssues;
                     <div class="col-lg-6 col-xl-4 mb-4">
                         <div class="card h-100 admin-card @(claim.Status == "Pending" ? "border-warning" : claim.Status == "Approved" ? "border-success" : "border-danger")">
                             <div class="card-header d-flex justify-content-between align-items-center">
@@ -49,6 +53,26 @@
                                 </span>
                             </div>
                             <div class="card-body">
+                                @if (hasBlocking)
+                                {
+                                    <div class="alert alert-danger py-2 px-3 d-flex align-items-center">
+                                        <i class="bi bi-shield-exclamation me-2"></i>
+                                        <div>
+                                            <div class="fw-semibold mb-0">Automation blocked approval</div>
+                                            <small>Resolve failed checks before approving.</small>
+                                        </div>
+                                    </div>
+                                }
+                                else if (hasWarnings)
+                                {
+                                    <div class="alert alert-warning py-2 px-3 d-flex align-items-center">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <div>
+                                            <div class="fw-semibold mb-0">Manual review recommended</div>
+                                            <small>Warnings detected in auto checks.</small>
+                                        </div>
+                                    </div>
+                                }
                                 <div class="row mb-3">
                                     <div class="col-6">
                                         <small class="text-muted">Lecturer</small>
@@ -86,10 +110,33 @@
                                     </div>
                                 </div>
 
+                                <div class="verification-results mb-3">
+                                    <small class="text-muted d-block mb-2">Automated Verification</small>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var check in review.VerificationResults)
+                                        {
+                                            var badgeClass = check.Status switch
+                                            {
+                                                ClaimVerificationStatus.Pass => "bg-success",
+                                                ClaimVerificationStatus.Warning => "bg-warning text-dark",
+                                                ClaimVerificationStatus.Fail => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                            <li class="list-group-item d-flex align-items-start px-0">
+                                                <span class="badge @badgeClass me-3 mt-1">@check.Status</span>
+                                                <div>
+                                                    <div class="fw-semibold">@check.RuleName</div>
+                                                    <small class="text-muted">@check.Message</small>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+
                                 @if (claim.Status == "Pending")
                                 {
                                     <div class="d-grid gap-2">
-                                        <button class="btn btn-success btn-sm" onclick="approveClaim(@claim.ClaimId)">
+                                        <button class="btn btn-success btn-sm" onclick="approveClaim(@claim.ClaimId)" @(hasBlocking ? "disabled" : string.Empty)>
                                             <i class="bi bi-check-circle me-1"></i>Approve
                                         </button>
                                         <button class="btn btn-danger btn-sm" onclick="rejectClaim(@claim.ClaimId)">
@@ -174,16 +221,29 @@
 
 @section Scripts {
     <script>
+        function setClaimId(form, claimId) {
+            let hidden = form.querySelector('input[name="claimId"]');
+            if (!hidden) {
+                hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'claimId';
+                form.appendChild(hidden);
+            }
+            hidden.value = claimId;
+        }
+
         function approveClaim(claimId) {
-            document.getElementById('approvalForm').action = '@Url.Action("ApproveClaim")';
-            document.getElementById('approvalForm').innerHTML += '<input type="hidden" name="claimId" value="' + claimId + '">';
+            const form = document.getElementById('approvalForm');
+            form.action = '@Url.Action("ApproveClaim")';
+            setClaimId(form, claimId);
             var modal = new bootstrap.Modal(document.getElementById('approvalModal'));
             modal.show();
         }
 
         function rejectClaim(claimId) {
-            document.getElementById('rejectionForm').action = '@Url.Action("RejectClaim")';
-            document.getElementById('rejectionForm').innerHTML += '<input type="hidden" name="claimId" value="' + claimId + '">';
+            const form = document.getElementById('rejectionForm');
+            form.action = '@Url.Action("RejectClaim")';
+            setClaimId(form, claimId);
             var modal = new bootstrap.Modal(document.getElementById('rejectionModal'));
             modal.show();
         }

@@ -128,9 +128,26 @@ namespace ST10439055_POE_PROG6212.Controllers
         {
             var claims = await _context.Claims
                 .Include(c => c.Lecturer)
+                .Include(c => c.SupportingDocuments)
                 .OrderByDescending(c => c.Month)
                 .ToListAsync();
-            return View(claims);
+
+            var duplicateLookup = claims
+                .GroupBy(c => $"{c.LecturerId}-{c.Month:yyyyMM}")
+                .ToDictionary(g => g.Key, g => g.Count() > 1);
+
+            var reviewModels = claims.Select(c =>
+            {
+                var key = $"{c.LecturerId}-{c.Month:yyyyMM}";
+                var hasDuplicate = duplicateLookup.TryGetValue(key, out var dup) && dup;
+                return new ClaimReviewViewModel
+                {
+                    Claim = c,
+                    VerificationResults = EvaluateClaim(c, hasDuplicate)
+                };
+            }).ToList();
+
+            return View(reviewModels);
         }
 
         [HttpPost]
@@ -221,6 +238,109 @@ namespace ST10439055_POE_PROG6212.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private static IEnumerable<ClaimVerificationResult> EvaluateClaim(Claim claim, bool hasDuplicateMonthSubmission)
+        {
+            var results = new List<ClaimVerificationResult>();
+
+            if (claim.HoursWorked > 180)
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Hours Worked",
+                    Status = ClaimVerificationStatus.Fail,
+                    Message = "Hours exceed the hard limit of 180 per month."
+                });
+            }
+            else if (claim.HoursWorked > 160)
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Hours Worked",
+                    Status = ClaimVerificationStatus.Warning,
+                    Message = "Hours exceed the recommended 160 per month. Please verify workload justification."
+                });
+            }
+            else
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Hours Worked",
+                    Status = ClaimVerificationStatus.Pass,
+                    Message = "Hours fall within the recommended range."
+                });
+            }
+
+            var expectedTotal = claim.Lecturer.HourlyRate * claim.HoursWorked;
+            if (Math.Abs(expectedTotal - claim.TotalAmount) > 0.01m)
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Hourly Rate Alignment",
+                    Status = ClaimVerificationStatus.Fail,
+                    Message = "Total does not match the lecturer's registered hourly rate."
+                });
+            }
+            else
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Hourly Rate Alignment",
+                    Status = ClaimVerificationStatus.Pass,
+                    Message = "Payment aligns with the lecturer's approved hourly rate."
+                });
+            }
+
+            if (claim.SupportingDocuments.Any())
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Supporting Documents",
+                    Status = ClaimVerificationStatus.Pass,
+                    Message = $"{claim.SupportingDocuments.Count} document(s) uploaded."
+                });
+            }
+            else
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Supporting Documents",
+                    Status = ClaimVerificationStatus.Fail,
+                    Message = "No supporting documents uploaded."
+                });
+            }
+
+            if (claim.Month.Date > DateTime.UtcNow.Date)
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Submission Period",
+                    Status = ClaimVerificationStatus.Fail,
+                    Message = "Claim submitted for a future period."
+                });
+            }
+            else
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Submission Period",
+                    Status = ClaimVerificationStatus.Pass,
+                    Message = "Submission month is valid."
+                });
+            }
+
+            if (hasDuplicateMonthSubmission)
+            {
+                results.Add(new ClaimVerificationResult
+                {
+                    RuleName = "Duplicate Submission",
+                    Status = ClaimVerificationStatus.Warning,
+                    Message = "Multiple claims detected for this lecturer and month."
+                });
+            }
+
+            return results;
         }
     }
 }
