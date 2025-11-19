@@ -166,22 +166,6 @@ namespace ST10439055_POE_PROG6212.Controllers
             return View(claims);
         }
 
-        public async Task<IActionResult> UploadDocs()
-        {
-            var guard = Guard(UserRole.ProgrammeCoordinator, UserRole.AcademicManager, UserRole.HR);
-            if (guard != null)
-            {
-                return guard;
-            }
-
-            var documents = await _context.SupportingDocuments
-                .Include(sd => sd.Claim)
-                .ThenInclude(c => c.Lecturer)
-                .OrderByDescending(sd => sd.UploadedAt)
-                .ToListAsync();
-            return View(documents);
-        }
-
         [HttpGet]
         public async Task<IActionResult> HRDashboard(string? filterMonth = null)
         {

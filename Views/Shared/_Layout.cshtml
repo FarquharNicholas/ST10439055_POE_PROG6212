@@ -71,7 +71,6 @@
                             <li class="nav-item"><a class="nav-link" href="@Url.Action("CoordinatorReview", "Home")">Programme Coordinator</a></li>
                             <li class="nav-item"><a class="nav-link" href="@Url.Action("AcademicManagerReview", "Home")">Academic Manager</a></li>
                             <li class="nav-item"><a class="nav-link" href="@Url.Action("HRDashboard", "Home")">HR Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="@Url.Action("UploadDocs", "Home")">Documents</a></li>
                         }
                         else if (userRole == UserRole.Lecturer.ToString())
                         {
@@ -81,12 +80,10 @@
                         else if (userRole == UserRole.ProgrammeCoordinator.ToString())
                         {
                             <li class="nav-item"><a class="nav-link" href="@Url.Action("CoordinatorReview", "Home")">Programme Coordinator</a></li>
-                            <li class="nav-item"><a class="nav-link" href="@Url.Action("UploadDocs", "Home")">Documents</a></li>
                         }
                         else if (userRole == UserRole.AcademicManager.ToString())
                         {
                             <li class="nav-item"><a class="nav-link" href="@Url.Action("AcademicManagerReview", "Home")">Academic Manager</a></li>
-                            <li class="nav-item"><a class="nav-link" href="@Url.Action("UploadDocs", "Home")">Documents</a></li>
                         }
                     }
                 </ul>
